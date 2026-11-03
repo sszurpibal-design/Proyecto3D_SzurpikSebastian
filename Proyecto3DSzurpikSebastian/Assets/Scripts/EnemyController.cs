@@ -1,6 +1,5 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
 public class EnemyController : MonoBehaviour
 {
     public float speed = 3f;
@@ -8,15 +7,21 @@ public class EnemyController : MonoBehaviour
     
     private Transform player;
     private Rigidbody rb;
+    private Animator animator;
 
     void Start()
     {
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
 
-        player = playerObj.transform;
+        if (playerObj != null)
+        {
+            player = playerObj.transform;
+        }
 
         rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true;    }
+        rb.freezeRotation = true;    
+        animator = GetComponentInChildren<Animator>();
+    }
 
     void FixedUpdate() 
     {
@@ -36,16 +41,31 @@ public class EnemyController : MonoBehaviour
 
                     Vector3 moveVelocity = direction * speed;
                     rb.velocity = new Vector3(moveVelocity.x, rb.velocity.y, moveVelocity.z);
+
+                    if (animator != null)
+                    {
+                        animator.SetFloat("speed", speed);
+                    }
                 }
             }
             else
             {
                 rb.velocity = new Vector3(0, rb.velocity.y, 0);
+
+                if (animator != null)
+                {
+                    animator.SetFloat("speed", 0f);
+                }
             }
         }
     }
 
     void OnCollisionEnter(Collision collision)
     {
+        // Si toca al jugador, lo destruye (muere)
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Destroy(collision.gameObject);
+        }
     }
 }
